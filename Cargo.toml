@@ -1,0 +1,15 @@
+[package]
+name = "goto"
+version = "0.1.0"
+authors = ["Denis Kotlyarov (Денис Котляров) <denis2005991@gmail.com>"]
+repository = "https://github.com/clucompany/Goto.git"
+homepage = "https://crates.io/crates/goto"
+license = "MIT"
+readme = "README.md"
+edition = "2018"
+
+description = "A safe but not complete implementation of the goto operator."
+keywords = ["goto", "goto_macro", "macro", "no_std", "clucompany"]
+categories = ["development-tools"]
+
+[dependencies]
