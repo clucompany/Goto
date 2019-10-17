@@ -1,7 +1,7 @@
 #	Goto
 A safe but not complete implementation of the goto operator.
 
-[![Build Status](https://travis-ci.org/clucompany/Enclose.svg?branch=master)](https://travis-ci.org/clucompany/Goto)
+[![Build Status](https://travis-ci.org/clucompany/Goto.svg?branch=master)](https://travis-ci.org/clucompany/Goto)
 [![Apache licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![crates.io](http://meritbadge.herokuapp.com/goto)](https://crates.io/crates/goto)
 [![Documentation](https://docs.rs/goto/badge.svg)](https://docs.rs/goto)
