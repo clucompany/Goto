@@ -2,7 +2,7 @@
 A safe but not complete implementation of the goto operator.
 
 [![Build Status](https://travis-ci.org/clucompany/Goto.svg?branch=master)](https://travis-ci.org/clucompany/Goto)
-[![Apache licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Mit/Apache licensed](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](./LICENSE)
 [![crates.io](http://meritbadge.herokuapp.com/goto)](https://crates.io/crates/goto)
 [![Documentation](https://docs.rs/goto/badge.svg)](https://docs.rs/goto)
 
@@ -50,3 +50,6 @@ fn main() {
 Copyright 2019 #UlinProject (Denis Kotlyarov) Денис Котляров
 
 Licensed under the MIT License
+
+Licensed under the Apache License, Version 2.0
+
