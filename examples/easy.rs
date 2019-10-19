@@ -8,7 +8,7 @@ fn main() {
 	let mut iter = data.iter();
 	let mut a;
 
-	gpoint!['begin + 'break_write_name + 'f:
+	gpoint!['begin:
 		a = iter.next();
 		match a {
 			Some(b'0') => {
@@ -22,7 +22,7 @@ fn main() {
 				println!("#a {:?}", a);
 				continue 'begin;
 			},
-			_ => break 'break_write_name,
+			_ => {},
 		}
 		
 	];

@@ -91,56 +91,5 @@ Licensed under the Apache License, Version 2.0
 
 #![no_std]
 
-/// "GOTO point", allows you to return to this line later.
-#[macro_export]
-macro_rules! gpoint {
-	[ $n:tt + $n2:tt + $n3:tt : $($tt: tt)* ] => {{
-		$n: loop {
-			$n2: loop {
-				$n3: loop {
-					$($tt)*
-					
-					#[allow(dead_code)]
-					#[allow(unreachable_code)]
-					break $n
-				}
-				
-				
-				#[allow(dead_code)]
-				#[allow(unreachable_code)]
-				break $n
-			}
-			
-			#[allow(dead_code)]
-			#[allow(unreachable_code)]
-			break $n
-		}
-	}};
-	
-	[ $n:tt + $n2:tt : $($tt: tt)* ] => {{
-		$n: loop {
-			$n2: loop {
-				$($tt)*
-				
-				
-				#[allow(dead_code)]
-				#[allow(unreachable_code)]
-				break $n
-			}
-			
-			#[allow(dead_code)]
-			#[allow(unreachable_code)]
-			break $n
-		}
-	}};
-	
-	[ $name:tt : $($tt:tt)* ] => {{
-		$name: loop {
-			$($tt)*
-			
-			#[allow(dead_code)]
-			#[allow(unreachable_code)]
-			break $name
-		}
-	}};
-}
+#[macro_use]
+mod gpoint;
