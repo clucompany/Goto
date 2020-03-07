@@ -2,7 +2,6 @@
 #[macro_use]
 extern crate goto;
 
-
 fn main() {
 	let data = b"1=2 2= 3=4";
 	let mut iter = data.iter();
@@ -14,7 +13,7 @@ fn main() {
 	#[derive(Debug, PartialEq)]
 	struct Element(Vec<u8>, Option<Vec<u8>>);
 	
-	gpoint!['write_name:
+	gblock!['write_name:
 		loop {
 			a = iter.next();
 			match a {
@@ -44,38 +43,36 @@ fn main() {
 		let name = buffer.to_owned();
 		buffer.clear();
 		
-		gpoint!['write_value:
-			loop {
-				a = iter.next();
-				match a {
-					Some(b' ') => {
-						match buffer.is_empty() {
-							true => result.push(Element(name, None)),
-							_ => result.push(Element(name, {
-								let a = buffer.to_owned();
-								buffer.clear();
-								
-								Some(a)
-							})),
-						}
-						continue 'write_name;
-					},
-					Some(a) => buffer.push(*a),
-					_ => {
-						match buffer.is_empty() {
-							true => result.push(Element(name, None)),
-							_ => result.push(Element(name, {
-								let a = buffer.to_owned();
-								buffer.clear();
-								
-								Some(a)
-							})),
-						}
-						break 'write_name;
-					},
-				}
+		'write_value: loop {
+			a = iter.next();
+			match a {
+				Some(b' ') => {
+					match buffer.is_empty() {
+						true => result.push(Element(name, None)),
+						_ => result.push(Element(name, {
+							let a = buffer.to_owned();
+							buffer.clear();
+							
+							Some(a)
+						})),
+					}
+					continue 'write_name;
+				},
+				Some(a) => buffer.push(*a),
+				_ => {
+					match buffer.is_empty() {
+						true => result.push(Element(name, None)),
+						_ => result.push(Element(name, {
+							let a = buffer.to_owned();
+							buffer.clear();
+							
+							Some(a)
+						})),
+					}
+					break 'write_name;
+				},
 			}
-		];
+		}
 		
 		continue 'write_name;
 	];

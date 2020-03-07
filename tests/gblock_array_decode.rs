@@ -3,7 +3,7 @@
 extern crate goto;
 
 #[test]
-fn array_decode() {
+fn gblock_array_decode() {
 	let data = b"1=2 2= 3=4";
 	let mut iter = data.iter();
 	
@@ -14,7 +14,7 @@ fn array_decode() {
 	#[derive(Debug, PartialEq)]
 	struct Element(Vec<u8>, Option<Vec<u8>>);
 	
-	gpoint!['write_name:
+	gblock!['write_name:
 		loop {
 			a = iter.next();
 			match a {
@@ -44,7 +44,7 @@ fn array_decode() {
 		let name = buffer.to_owned();
 		buffer.clear();
 		
-		gpoint!['write_value:
+		gblock!['write_value:
 			loop {
 				a = iter.next();
 				match a {

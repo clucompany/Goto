@@ -93,3 +93,6 @@ Licensed under the Apache License, Version 2.0
 
 #[macro_use]
 mod gpoint;
+
+#[macro_use]
+mod gblock;

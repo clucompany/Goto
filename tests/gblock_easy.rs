@@ -3,16 +3,16 @@
 extern crate goto;
 
 #[test]
-fn gpoint() {
+fn gblock_easy() {
 	let mut num = 0;
 	
-	gpoint!['add_one:
+	gblock!['add_one:
 		num += 1;
 		
-		gpoint!['add_two:
+		gblock!['add_two:
 			num += 2;
 			
-			gpoint!['add_three:
+			gblock!['add_three:
 				num += 3;
 				
 				if num != 54 {
