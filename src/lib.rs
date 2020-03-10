@@ -1,4 +1,4 @@
-//Copyright (c) 2019 #UlinProject Denis Kotlyarov (Денис Котляров)
+//Copyright (c) 2020 #UlinProject Denis Kotlyarov (Денис Котляров)
 
 //-----------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-// #Ulin Project 1819
+// #Ulin Project 20
 
 /*!
 A safe but not complete implementation of the goto operator.
@@ -45,43 +45,49 @@ A safe but not complete implementation of the goto operator.
 2. We do not plan to violate Rust's safety standards. We provide useful and interesting macros that partially (or fully) implement the goto operator.
 
 
-# gpoint:
-"GOTO point", allows you to return to this line later.
+# gblock:
+A safe version of the "goto" prisoner in the block. Ability to move to the beginning of the block or to the end of the block.
 
 ```rust
-#[macro_use]
-extern crate goto;
-
-fn main() {
-	let data = b"1234567890";
-	let mut iter = data.iter();
-	let mut a;
-
-	gpoint!['begin:
-		a = iter.next();
-		match a {
-			a @ Some(b'0') if a == Some(&b'9') => {
-				println!("#a 0!");
-				
-				gpoint!['add:
-					
-				];
-			},
-			Some(a) => {
-				println!("#a {}", unsafe { std::char::from_u32_unchecked(*a as u32) });
-				continue 'begin;
-			},
-			_ => break 'begin,
+let file_path = Path::new("./gblock_logic");
+let file_data: Cow<str>;
+gblock!['is_create_file:
+	gblock!['decode_file:
+		// decode file
+		let mut file = match std::fs::File::open(&file_path) {
+			Ok(a) => a,
+			Err(_e) => to_end_gblock!('decode_file),
+		};
+		
+		let mut buff = String::with_capacity(25);
+		if let Err(_e) = file.read_to_string(&mut buff) {
+			to_end_gblock!('decode_file);
 		}
 		
+		if buff.is_empty() { // no empty data...
+			to_end_gblock!('decode_file);
+		}
+		file_data = buff.into(); // String -> Cow<str>
+		to_end_gblock!('is_create_file); //OK
 	];
-}
-
+	
+	// create new file and default value
+	let mut file = match std::fs::File::create(&file_path) {
+		Ok(a) => a,
+		Err(e) => panic!("{:?}", e),
+	};
+	let data = "FALSE";
+	if let Err(e) = file.write(data.as_bytes()) {
+		panic!("{:?}", e);
+	}
+	file_data = data.into(); // str -> Cow<str>
+];
+println!("{:?}", file_data);
 ```
 
 # License
 
-Copyright 2019 #UlinProject (Denis Kotlyarov) Денис Котляров
+Copyright 2020 #UlinProject (Denis Kotlyarov) Денис Котляров
 
 Licensed under the MIT License
 
@@ -89,10 +95,13 @@ Licensed under the Apache License, Version 2.0
 
 */
 
-#![no_std]
+//#![no_std]
 
 #[macro_use]
 mod gpoint;
 
 #[macro_use]
 mod gblock;
+
+#[macro_use]
+mod gtree;

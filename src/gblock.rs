@@ -1,4 +1,5 @@
 
+/// Move to the beginning of "gblock".
 #[macro_export]
 macro_rules! to_start_gblock {
 	[ $n:tt: $($tt:tt)* ] => {
@@ -9,6 +10,8 @@ macro_rules! to_start_gblock {
 	};
 }
 
+
+/// Move to the end of "gblock".
 #[macro_export]
 macro_rules! to_end_gblock {
 	[ $n:tt: $($tt:tt)+ ] => {
@@ -20,7 +23,7 @@ macro_rules! to_end_gblock {
 }
 
 
-/// "GOTO point", allows you to return to this line later.
+/// A safe version of the "goto" prisoner in the block. Ability to move to the beginning of the block or to the end of the block.
 #[macro_export]
 macro_rules! gblock {
 	[ $n:tt $(, $n2:tt)* $( ($($r:tt)*) )*: ] => {{
