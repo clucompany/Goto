@@ -4,18 +4,46 @@ extern crate goto;
 
 
 fn main() {
-	let data = "test=test2 test test3=test";
-	let mut buffer = Vec::with_capacity(50);
-	let mut iter = data.as_bytes().iter();
+	let data = "BOOT_IMAGE=/boot/vmlinuz-linux-zen root=UUID=6dffe60c-02ae-46ee-ad44-2a50cde7c64e rw quiet resume=/dev/sda2 nowatchdog clocksource=acpi_pm acpi_enforce_resources=lax audit=0 nopti nospectre_v2 l1tf=off no_stf_barrier nospec_store_bypass_disable noibrs noibpb";
+	
 	gtree! {
+		#let mut buffer = Vec::with_capacity(50);
+		#let mut iter = data.as_bytes().iter();
+		
+		'decode_symbols => 't :tree {
+			#let test = 12;
+			'root {
+				
+			};
+		};
+		
 		'decode_symbols {
 			//write name
 			loop {
 				match iter.next() {
-					Some(b'=') => break, // WRITE VALUE
+					Some(b'=') => {
+						// write name
+						let name = unsafe { std::string::String::from_utf8_unchecked(buffer.to_owned()) };
+						buffer.clear();
+						loop {
+							match iter.next() {
+								Some(b' ') => run_gtree!('two_value: name, {
+									let data = unsafe { std::string::String::from_utf8_unchecked(buffer.to_owned()) };
+									buffer.clear();
+									data
+								}),
+								Some(a) => buffer.push(*a),
+								None => match buffer.is_empty() { // name
+									true => run_gtree!('end_one_value: unsafe { std::string::String::from_utf8_unchecked(buffer) }),
+									false => run_gtree!('end_two_value: name, unsafe { std::string::String::from_utf8_unchecked(buffer) }),
+								}
+							}
+						}
+						
+					}, // WRITE VALUE
 					Some(b' ') => match buffer.is_empty() {
 						false => run_gtree!('one_value: {
-							let data = unsafe { std::string::String::from_utf8_unchecked(buffer.to_vec()) };
+							let data = unsafe { std::string::String::from_utf8_unchecked(buffer.to_owned()) };
 							buffer.clear();
 							data
 						}),
@@ -23,30 +51,13 @@ fn main() {
 					},
 					Some(a) => buffer.push(*a),
 					None => match buffer.is_empty() {
+						true => break 'decode_symbols, // end
 						false => run_gtree!('end_one_value: unsafe { std::string::String::from_utf8_unchecked(buffer) }),
-						_ => break 'decode_symbols, // end
-					}
-				}
-			}
-			//write value
-			let name = unsafe { std::string::String::from_utf8_unchecked(buffer.to_owned()) };
-			buffer.clear();
-			loop {
-				match iter.next() {
-					Some(b' ') => run_gtree!('two_value: name, {
-						let data = unsafe { std::string::String::from_utf8_unchecked(buffer.to_owned()) };
-						buffer.clear();
-						data
-					}),
-					Some(a) => buffer.push(*a),
-					None => match buffer.is_empty() { // name
-						true => run_gtree!('end_one_value: unsafe { std::string::String::from_utf8_unchecked(buffer) }),
-						false => run_gtree!('end_two_value: name, unsafe { std::string::String::from_utf8_unchecked(buffer) }),
 					}
 				}
 			}
 		};
-		
+
 		// ONE_VALUE
 		'decode_symbols => 'end_one_value(name: String) {
 			println!("#1 {}", name);
@@ -55,7 +66,6 @@ fn main() {
 			println!("#1 {}", name);
 			continue 'decode_symbols;
 		};
-		
 		
 		// TWO_VALUE
 		'decode_symbols => 'end_two_value(name: String, value: String) {
