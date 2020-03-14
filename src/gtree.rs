@@ -156,14 +156,14 @@ macro_rules! __gtree {
 		}
 	};
 	
-	// :clone_anew($l: lifetime -> $r: lifetime (ttt))
+	// :clone_anewrun($l: lifetime -> $r: lifetime (ttt))
 	[ [$($c:tt)*][
 		root[$($root:tt)*]
 		data[$($data:tt)*]
 		end_data[$($end:tt)*]
 		tree[$($tree:tt)*] 
 	][$($inc:tt)*]
-		@{[$t:lifetime $t2:lifetime][$($args:tt)*][: clone_anew ($l_trans:lifetime -> $r_trans:lifetime) {$($b:tt)*}]}
+		@{[$t:lifetime $t2:lifetime][$($args:tt)*][: clone_anewrun ($l_trans:lifetime -> $r_trans:lifetime) {$($b:tt)*}]}
 	$($all:tt)* ] => { //1
 		$crate::__gtree! {
 			[$($c)*][ 

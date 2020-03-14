@@ -1,6 +1,6 @@
 [package]
 name = "goto"
-version = "0.1.3"
+version = "0.1.6"
 authors = ["Denis Kotlyarov (Денис Котляров) <denis2005991@gmail.com>"]
 repository = "https://github.com/clucompany/Goto.git"
 homepage = "https://crates.io/crates/goto"
@@ -8,8 +8,8 @@ license = "MIT/Apache-2.0"
 readme = "README.md"
 edition = "2018"
 
-description = "A safe but not complete implementation of the goto operator."
-keywords = ["goto", "goto_macro", "macro", "no_std", "clucompany"]
+description = "Safe and convenient zero-cost 'goto' implementations for RustLang."
+keywords = ["goto", "gtree", "macro", "no_std", "clucompany"]
 categories = ["development-tools"]
 
 [dependencies]
