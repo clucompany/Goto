@@ -52,11 +52,14 @@ The main branch is a branch with a single root name, it is from the main branch 
 It is allowed to descend to the desired branch or climb the branch.
 
 // Gtree does not use functions and is strictly on the same stack
+
 // Technologies used are also used in gblock.
 
 It is assumed that "gtree" will be used in parsers or other methods of logical actions.
 
 If there is no transition to another branch in the code of the branch, it is assumed that "gtree" should complete its work.
+
+# 1 Example
 
 ```rust
 #[macro_use]
@@ -91,10 +94,6 @@ fn main() {
 			file_data = buff.into(); // String -> Cow<str>
 		};
 		
-		'checker => 'full_unk_error(error) {
-			panic!("{:?}", error);
-		};
-		
 		'checker => 'err_load_file(error) {
 			println!("Err, read file, {:?}", error);
 			
@@ -108,11 +107,17 @@ fn main() {
 			}
 			file_data = data.into(); // str -> Cow<str>
 		};
+		
+		'checker => 'full_unk_error(error) {
+			panic!("{:?}", error);
+		};
 	}
 	
 	println!("{:?}", file_data);
 }
 ```
+
+# 2 Example
 
 ```rust
 #[macro_use]

@@ -31,10 +31,6 @@ fn main() {
 			file_data = buff.into(); // String -> Cow<str>
 		};
 		
-		'checker => 'full_unk_error(error) {
-			panic!("{:?}", error);
-		};
-		
 		'checker => 'err_load_file(error) {
 			println!("Err, read file, {:?}", error);
 			
@@ -47,6 +43,9 @@ fn main() {
 				run_gtree!('full_unk_error: e);
 			}
 			file_data = data.into(); // str -> Cow<str>
+		};
+		'checker => 'full_unk_error(error) {
+			panic!("{:?}", error);
 		};
 	}
 	

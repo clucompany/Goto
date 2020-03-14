@@ -151,7 +151,7 @@ macro_rules! __gtree {
 				root[$($root)*]
 				data[$($data)*]
 				end_data[$($end)*]
-				tree[$($data2)* {[$t $t2][$($args)*][$($b)*]}]
+				tree[{[$t $t2][$($args)*][$($b)*]} $($data2)*]
 			][$($inc)*] @$($all)*
 		}
 	};
@@ -168,8 +168,8 @@ macro_rules! __gtree {
 		$crate::__gtree! {
 			[$($c)*][ 
 				root[$($root)*] 
-				data[$($data)*		{[$t $t2][$($args)*][$($b)*]} ] 
-				end_data[$($end)*	{[$t $l_trans][$($args)*][$($b)* continue $r_trans;]} ] 
+				data[{[$t $t2][$($args)*][$($b)*]}  $($data)*	 ] 
+				end_data[{[$t $l_trans][$($args)*][$($b)* continue $r_trans;]}  $($end)*	 ] 
 				tree[$($tree)*] 
 			][$($inc)*] @$($all)*
 		}
@@ -187,8 +187,8 @@ macro_rules! __gtree {
 		$crate::__gtree! {
 			[$($c)*][ 
 				root[$($root)*] 
-				data[$($data)*		{[$t $t2][$($args)*][$($b)*]} ] 
-				end_data[$($end)*	{[$t $l_trans][$($args)*][$($b)* break $r_trans $(( $($r_args)* ))?;]} ] 
+				data[{[$t $t2][$($args)*][$($b)*]} $($data)* ]  // переворот требуется
+				end_data[{[$t $l_trans][$($args)*][$($b)* break $r_trans $(( $($r_args)* ))?;]} $($end)*] 
 				tree[$($tree)*] 
 			][$($inc)*] @$($all)*
 		}
@@ -210,7 +210,7 @@ macro_rules! __gtree {
 		$crate::__gtree! {
 			[$($c)*][
 				root[$($root)*] 
-				data[$($data)*		{[$t $t2][$($args)*][$($b)*]}] 
+				data[{[$t $t2][$($args)*][$($b)*]} $($data)*] 
 				end_data[$($end)*] 
 				tree[$($data2)*] 
 			][$($inc)*] @$($all)*
@@ -264,7 +264,7 @@ macro_rules! __gtree {
 				$crate::create_looper! { // no dop
 					[$break][$r $rb] @ 
 					
-					start[$({ [$t2][$($args)*][$($b)*] })*]
+					start[	$({ [$t2][$($args)*][$($b)*] })*	]
 					
 					end[
 						$({ [$end_t2][$($end_args)*] // end
@@ -323,7 +323,6 @@ macro_rules! create_looper {
 			break $break;
 		};
 		$($tblock)*
-		//$(	drop( $args );	)*
 	}};
 	//
 	
