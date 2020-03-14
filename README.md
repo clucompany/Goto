@@ -24,7 +24,7 @@ It is assumed that "gtree" will be used in parsers or other methods of logical a
 
 If there is no transition to another branch in the code of the branch, it is assumed that "gtree" should complete its work.
 
-# 1 Example
+### 1 Example
 
 ```rust
 #[macro_use]
@@ -82,7 +82,7 @@ fn main() {
 }
 ```
 
-# 2 Example
+### 2 Example
 
 ```rust
 #[macro_use]
