@@ -4,7 +4,7 @@ extern crate goto;
 
 fn main() {
 	let mut default_result = 1023;
-	let e = gblock!['value, 'value2 (new_value(default_result)):
+	let e = gblock!['value, 'value2 -> (new_value(default_result)):
 		default_result += 1;
 	];
 	

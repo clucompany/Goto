@@ -8,8 +8,8 @@ fn main() {
 	let mut buffer = Vec::with_capacity(50);
 	
 	gblock!['root:
-		let (name, value) = gblock!['combo_value (unimplemented!()):
-			let name = gblock!['empty_value (unimplemented!()):
+		let (name, value) = gblock!['combo_value -> (unimplemented!()):
+			let name = gblock!['empty_value -> (unimplemented!()):
 				'decode_name: loop {
 					match iter.next() {
 						Some(b' ') => to_end_gblock!('empty_value: match buffer.is_empty() {

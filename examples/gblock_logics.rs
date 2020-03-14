@@ -13,7 +13,7 @@ fn main() {
 	let file_path = Path::new("./gblock_logic");
 	let file_data: Cow<str>;
 	gblock!['is_create_file:
-		let err_read_file = gblock!['decode_file (to_end_gblock!('is_create_file)):
+		let err_read_file = gblock!['decode_file -> (to_end_gblock!('is_create_file)):
 			// decode file
 			let mut file = match std::fs::File::open(&file_path) {
 				Ok(a) => a,
