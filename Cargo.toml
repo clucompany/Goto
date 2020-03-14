@@ -8,7 +8,7 @@ license = "MIT/Apache-2.0"
 readme = "README.md"
 edition = "2018"
 
-description = "Safe and convenient zero-cost 'goto' implementations for RustLang."
+description = "Safe and convenient zero-cost goto operator implementations for RustLang."
 keywords = ["goto", "gtree", "macro", "no_std", "clucompany"]
 categories = ["development-tools"]
 
