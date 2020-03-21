@@ -12,7 +12,7 @@ fn main() {
 		#let mut iter = data.as_bytes().iter();
 		#let mut a;
 		
-		'decode_symbols {  // root tree
+		'decode_symbols { // root tree
 			//write name
 			loop {
 				a = iter.next();

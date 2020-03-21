@@ -26,7 +26,7 @@ macro_rules! to_end_gblock {
 /// A safe version of the "goto" prisoner in the block. Ability to move to the beginning of the block or to the end of the block.
 #[macro_export]
 macro_rules! gblock {
-	[ $name:lifetime $(, $lifetime:lifetime)* $( -> ($($breaker:tt)*) )*: ] => {
+	[ $name:lifetime $(, $alias:lifetime)* $( -> ($($breaker:tt)*) )*: ] => {
 		//empty
 	};
 	[ $name:lifetime $(, $alias:lifetime)* $( -> ($($breaker:tt)*) )?: $($data:tt)* ] => {{

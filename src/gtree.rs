@@ -1,6 +1,9 @@
 
 #[macro_export]
 macro_rules! anew_gtree {
+	[ $n:tt: $($e:expr),*] => {
+		continue $n ( $($e),* );
+	};
 	[ $n:tt: $($tt:tt)* ] => {
 		continue $n {$($tt)+};
 	};
@@ -12,10 +15,10 @@ macro_rules! anew_gtree {
 
 #[macro_export]
 macro_rules! run_gtree {
-	[ $n:tt: $($ident:expr),*] => {
-		break $n ( $($ident),* );
+	[ $n:tt: $($e:expr),*] => {
+		break $n ( $($e),* );
 	};
-	[ $n:tt: $($tt:tt)+ ] => {
+	[ $n:tt: $($tt:tt)* ] => {
 		break $n {$($tt)+};
 	};
 	[ $n:tt ] => {
@@ -25,87 +28,92 @@ macro_rules! run_gtree {
 
 #[macro_export]
 macro_rules! gtree {
-	
 	[
-		$(@hidden_inc [ $($data_args:tt)* ])?
+		$(@hidden_inc [ $($include_lets:tt)* ])?
 		$(@hidden_break $break:lifetime)?
 
-		$($t:lifetime $(=> $t2:lifetime)? $(($($args:tt)*))? // name function
-		
-		$(: $name:tt $(( $($dop_data:tt)* ))? {$($b:tt)*})? $($b2:block)? ;)* 
+		$(	
+			$rl:lifetime $(=> $l:lifetime)? $(($($args:tt)*))? // name function
+			
+			$(: $name:tt $(( $($dop_data:tt)* ))? )? // pre_fn
+			
+			{$($b:tt)*} // fn
+		;)*
 	] => {
 		$crate::__gtree! {
-			[$($break)? ][ root[]	data[] end_data[] tree[]	] [$( $($data_args)* )?]
-			@$({[$t $($t2)?][$($($args)*)?][$(:$name $(( $($dop_data)* ))? {$($b)*})? $($b2)?]})*
+			[$($break)? ][ root[]	data[] end_data[] tree[]	] [$( $($include_lets)* )?]
+			@$({
+				[$rl $($l)?][$($($args)*)?][$(:$name $(( $($dop_data)* ))? )? {$($b)*}]
+			})*
 		}
 	};
 	
 	
 	// LET
 	[
-		$(@hidden_inc [ $($data_args:tt)* ])?
+		$(@hidden_inc [ $($include_lets:tt)* ])?
 		$(@hidden_break $break:lifetime)?
 		
 		#let $ident:ident $(: $ty:ty)? $(= $expr:expr)?;
-		$($all_tt:tt)*
+		$($all:tt)*
 	] => {
 		$crate::gtree! {
 			@hidden_inc [
-				$($($data_args)*)?
+				$($($include_lets)*)?
 				let $ident $(: $ty)? $(= $expr)?;
 			]
 			$(@hidden_break $break)?
 			
-			$($all_tt)*
+			$($all)*
 		}
 	};
 	[
-		$(@hidden_inc [ $($data_args:tt)* ])?
+		$(@hidden_inc [ $($include_lets:tt)* ])?
 		$(@hidden_break $break:lifetime)?
 		
 		#let mut $ident:ident $(: $ty:ty)? $(= $expr:expr)?;
-		$($all_tt:tt)*
+		$($all:tt)*
 	] => {
 		$crate::gtree! {
 			@hidden_inc [
-				$($($data_args)*)?
+				$($($include_lets)*)?
 				let mut $ident $(: $ty)? $(= $expr)?;
 			]
 			$(@hidden_break $break)?
-			$($all_tt)*
+			$($all)*
 		}
 	};
 	// END LET
 	
 	// BREAK
 	[
-		$(@hidden_inc [ $($data_args:tt)* ])?
-		@hidden_break $l:lifetime
+		$(@hidden_inc [ $($include_lets:tt)* ])?
+		@hidden_break $break:lifetime
 		
 		#break $rl:lifetime;
-		$($all_tt:tt)*
+		$($all:tt)*
 	] => {
 		compile_error!("Нельзя переопределить break.")
 	};
 	[
-		$(@hidden_inc [ $($data_args:tt)* ])?
+		$(@hidden_inc [ $($include_lets:tt)* ])?
 		//$(@hidden_break $l:lifetime)?
 		
 		#break $rl:lifetime;
-		$($all_tt:tt)*
+		$($all:tt)*
 	] => {
 		$crate::gtree! {
-			$(@hidden_inc [$($data_args)*])?
+			$(@hidden_inc [$($include_lets)*])?
 			@hidden_break $rl
 			
-			$($all_tt)*
+			$($all)*
 		}
 	};
 	// END BREAK
 	
 	[
-		$(@hidden_inc [ $($data_args:tt)* ])? 
-		$(@hidden_break $l:lifetime)?
+		$(@hidden_inc [ $($include_lets:tt)* ])? 
+		$(@hidden_break $break:lifetime)?
 	] => {};
 }
 
@@ -113,23 +121,23 @@ macro_rules! gtree {
 #[macro_export]
 macro_rules! __gtree {
 	// end set root
-	[ [$($c:tt)*][ root[$($root:tt)+] $($data:tt)*][$($inc:tt)*] @{[$t:lifetime][$($args:tt)*][$b:block]} $($all:tt)* ] => { // root_yes // 1
+	[ [$($config:tt)*][ root[$($root:tt)+] $($data:tt)*][$($inc:tt)*] @{[$t:lifetime][$($args:tt)*][$($block:tt)*]} $($all:tt)* ] => { // root_yes // 1
 		compile_error!("Рут уже определен");
 	};
-	[ [$($c:tt)*][ $($data:tt)*][$($inc:tt)*] @{[$t:lifetime][$($args:tt)+][$b:block]} $($all:tt)* ] => { // set root // 1
+	[ [$($config:tt)*][ $($data:tt)*][$($inc:tt)*] @{[$t:lifetime][$($args:tt)+][$($block:tt)*]} $($all:tt)* ] => { // set root // 1
 		compile_error!("Рут не может иметь входных данных");
 	};
 	//
 	
 	// SET BREAK LIFETIME AND SET ROOT
-	[ [$break:lifetime][ root[] $($data:tt)*][$($inc:tt)*] @{[$t:lifetime][][$b:block]} $($all:tt)* ] => { // set root // 1
+	[ [$break:lifetime][ root[] $($data:tt)*][$($inc:tt)*] @{[$rl:lifetime][][$($block:tt)*]} $($all:tt)* ] => { // set root // 1
 		$crate::__gtree! {
-			[$break][ root[$t $b] $($data)*][$($inc)*] @$($all)*
+			[$break]	[ root[$rl $($block)*] $($data)*][$($inc)*] @$($all)*
 		}
 	};
-	[ [][ root[] $($data:tt)*][$($inc:tt)*] @{[$t:lifetime][][$b:block]} $($all:tt)* ] => { // set root // 1
+	[ [][ root[] $($data:tt)*][$($inc:tt)*] @{[$rl:lifetime][][$($block:tt)*]} $($all:tt)* ] => { // set root // 1
 		$crate::__gtree! {
-			[$t][ root[$t $b] $($data)*][$($inc)*] @$($all)*
+			[$rl]	[ root[$rl $($block)*] $($data)*][$($inc)*] @$($all)*
 		}
 	};
 	//
@@ -138,120 +146,127 @@ macro_rules! __gtree {
 	
 	// added data
 	// :tree {'bbb}
-	[ [$($c:tt)*][
+	[ [$($config:tt)*][
 		root[$($root:tt)*]
 		data[$($data:tt)*]
-		end_data[$($end:tt)*]
-		tree[$($data2:tt)*]
+		end_data[$($end_data:tt)*]
+		tree[$($tree:tt)*]
 	][$($inc:tt)*] 
-		@{[$t:lifetime $t2:lifetime][$($args:tt)*][: tree {$($b:tt)*}]} 
+		@{[$rl:lifetime $l:lifetime][$($args:tt)*][: tree {$($block:tt)*}]}
 	$($all:tt)* ] => { //1
 		$crate::__gtree! {
-			[$($c)*][
+			[$($config)*][
 				root[$($root)*]
 				data[$($data)*]
-				end_data[$($end)*]
-				tree[{[$t $t2][$($args)*][$($b)*]} $($data2)*]
+				end_data[$($end_data)*]
+				tree[{[$rl $l][$($args)*][$($block)*]} $($tree)*]
 			][$($inc)*] @$($all)*
 		}
 	};
 	
 	// :clone_anewrun($l: lifetime -> $r: lifetime (ttt))
-	[ [$($c:tt)*][
+	[ [$($config:tt)*][
 		root[$($root:tt)*]
 		data[$($data:tt)*]
-		end_data[$($end:tt)*]
-		tree[$($tree:tt)*] 
+		end_data[$($end_data:tt)*]
+		tree[$($tree:tt)*]
 	][$($inc:tt)*]
-		@{[$t:lifetime $t2:lifetime][$($args:tt)*][: clone_anewrun ($l_trans:lifetime -> $r_trans:lifetime) {$($b:tt)*}]}
+		@{[$rl:lifetime $l:lifetime][$($args:tt)*][: clone_anewrun ($l_trans:lifetime -> $r_trans:lifetime) {$($block:tt)*}]}
 	$($all:tt)* ] => { //1
 		$crate::__gtree! {
-			[$($c)*][ 
-				root[$($root)*] 
-				data[{[$t $t2][$($args)*][$($b)*]}  $($data)*	 ] 
-				end_data[{[$t $l_trans][$($args)*][$($b)* continue $r_trans;]}  $($end)*	 ] 
-				tree[$($tree)*] 
+			[$($config)*][
+				root[$($root)*]
+				data[{[$rl $l][$($args)*][$($block)*]}  $($data)* ]
+				end_data[{[$rl $l_trans][$($args)*][$($block)* continue $r_trans;]}  $($end_data)*	 ] 
+				tree[$($tree)*]
 			][$($inc)*] @$($all)*
 		}
 	};
 	
 	// :clone_run($l: lifetime -> $r: lifetime (ttt))
-	[ [$($c:tt)*][
+	[ [$($config:tt)*][
 		root[$($root:tt)*]
 		data[$($data:tt)*]
-		end_data[$($end:tt)*]
-		tree[$($tree:tt)*] 
+		end_data[$($end_data:tt)*]
+		tree[$($tree:tt)*]
 	][$($inc:tt)*]
-		@{[$t:lifetime $t2:lifetime][$($args:tt)*][: clone_run ($l_trans:lifetime -> $r_trans:lifetime $(( $($r_args:tt)* ))?) {$($b:tt)*}]} 
+		@{[$rl:lifetime $l:lifetime][$($args:tt)*][: clone_run ($l_trans:lifetime -> $r_trans:lifetime $(( $($r_args:tt)* ))?) {$($block:tt)*}]} 
 	$($all:tt)* ] => { //1
 		$crate::__gtree! {
-			[$($c)*][ 
-				root[$($root)*] 
-				data[{[$t $t2][$($args)*][$($b)*]} $($data)* ]  // переворот требуется
-				end_data[{[$t $l_trans][$($args)*][$($b)* break $r_trans $(( $($r_args)* ))?;]} $($end)*] 
-				tree[$($tree)*] 
+			[$($config)*][
+				root[$($root)*]
+				data[{[$rl $l][$($args)*][$($b)*]} $($data)* ]
+				end_data[{[$rl $l_trans][$($args)*][$($block)* break $r_trans $(( $($r_args)* ))?;]} $($end_data)* ]
+				tree[$($tree)*]
 			][$($inc)*] @$($all)*
 		}
 	};
 		
 	// : unknown, WARNING!
-	[ [$($c:tt)*][
+	[ [$($config:tt)*][
 		root[$($root:tt)*]
 		data[$($data:tt)*]
-		end_data[$($end:tt)*]
+		end_data[$($end_data:tt)*]
 		tree[$($data2:tt)*] ]
 	[$($inc:tt)*] 
-		@{[$t:lifetime $t2:lifetime][$($args:tt)*][: $uuu:tt $(($($uut:tt)*))? {$($b:tt)*}]} 
+		@{[$rl:lifetime $l:lifetime][$($args:tt)*][: $uuu:tt $(($($uut:tt)*))? {$($block:tt)*}]} 
 	$($all:tt)* ] => { //1
 		compile_error!(concat!("Неопределенный тип \"", stringify!($uuu), "\""))
 	};
 	// {block}
-	[ [$($c:tt)*][ root[$($root:tt)*] data[$($data:tt)*] end_data[$($end:tt)*] tree[$($data2:tt)*] ][$($inc:tt)*] @{[$t:lifetime $t2:lifetime][$($args:tt)*][$($b: tt)*]} $($all:tt)* ] => { //1
+	[ [$($config:tt)*][
+		root[$($root:tt)*]
+		data[$($data:tt)*]
+		end_data[$($end_data:tt)*]
+		tree[$($tree:tt)*] ]
+	[$($inc:tt)*] 
+		@{[$rl:lifetime $l:lifetime][$($args:tt)*][$($block: tt)*]} 
+	$($all:tt)* ] => { //1
 		$crate::__gtree! {
-			[$($c)*][
-				root[$($root)*] 
-				data[{[$t $t2][$($args)*][$($b)*]} $($data)*] 
-				end_data[$($end)*] 
-				tree[$($data2)*] 
+			[$($config)*][
+				root[$($root)*]
+				data[{[$rl $l][$($args)*][$($block)*]} $($data)*]
+				end_data[$($end_data)*]
+				tree[$($tree)*]
 			][$($inc)*] @$($all)*
 		}
 	};
 	
 	// checker
-	[ [$($c:tt)*][ root[] $($data:tt)+][$($inc:tt)*] @] => { //end, root
+	[ [$($config:tt)*][ root[] $($data:tt)+][$($inc:tt)*] @] => { //end, root
 		compile_error!("Требуется определить рут");
 	};
 
 	// end, runtime
 	[
-		[$break:lifetime]
+		[$break:lifetime] // config
 		[ 
-			root[	$r:lifetime $rb:block	] 
+			root[	$rl:lifetime $($rb:tt)*	] 
 			data[	$({[$t1:lifetime $t2:lifetime][$($args:tt)*][$($b:tt)*]})*	]
 			end_data[	$({[$end_t1:lifetime $end_t2:lifetime][$($end_args:tt)*][$($end_b:tt)*]})*	]
 			tree[	$({[$nt1:lifetime $nt2:lifetime][$($nargs:tt)*][$($nb:tt)*]})*	] 
 		]
-		[$($inc:tt)*] 
+		[$($inc:tt)*]
 	@] => { //end
 		
 		// check 'root
 		$(
 			$crate::tt_equals! {
-				if $r != $t1 {
+				if $rl != $t1 {
 					compile_error!(concat!("Неопределенный корень \"", stringify!($t1), "\""));
 				}
 			}
 		)*
 		$(
 			$crate::tt_equals! {
-				if $r != $end_t1 {
+				if $rl != $end_t1 {
 					compile_error!(concat!("Неопределенный корень \"", stringify!($end_t1), "\""));
 				}
 			}
 		)*
 		$(
 			$crate::tt_equals! {
-				if $r != $nt1 {
+				if $rl != $nt1 {
 					compile_error!(concat!("Неопределенный корень \"", stringify!($nt1), "\""));
 				}
 			}
@@ -260,9 +275,9 @@ macro_rules! __gtree {
 		
 		#[allow(unreachable_code)] {
 			$($inc)*
-			$r: loop {
+			$rl: loop {
 				$crate::create_looper! { // no dop
-					[$break][$r $rb] @ 
+					[$break][$rl $($rb)*] @
 					
 					start[	$({ [$t2][$($args)*][$($b)*] })*	]
 					
@@ -284,7 +299,13 @@ macro_rules! __gtree {
 				}
 				
 				break $break;
-				break $r; // ignore warning unused_labels
+				
+				//
+				$crate::tt_equals! {
+					if $rl != $break {
+						break $rl; // ignore warning unused_labels
+					}
+				}
 			}
 		}
 	};
@@ -302,22 +323,28 @@ macro_rules! create_looper_type {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! create_looper {
-	[ [$break:lifetime][$r:lifetime $rb:block]@ start[] end[] ] => {{
-		$rb
+	[ [$break:lifetime][$r:lifetime $($root_block:tt)*] // end
+		@ start[] end[]
+	] => {{
+		$($root_block)*
 	}};
 	
 	// next line
-	[ [$break:lifetime][$($root:tt)*]@ start[] end[$($all:tt)+] ] => {
+	[ [$break:lifetime][$($root:tt)*]
+		@ start[] end[$($end:tt)+]
+	] => {
 		$crate::create_looper! {
-			[$break][$($root)*] @ start[$($all)+] end[]
+			[$break][$($root)*] @ start[$($end)+] end[]
 		}
 	};
 	
 	// args
-	[ [$break:lifetime][$r:lifetime $rb:block]@ start[{ [$tname:lifetime][$($args:ident $(:$aty:ty)? ),+][$($tblock:tt)*] } $($start_tt:tt)*] end[$($end_tt:tt)*] ] => {{
+	[ [$break:lifetime][$r:lifetime $($root_block:tt)*]
+		@ start[{ [$tname:lifetime][$($args:ident $(:$aty:ty)? ),+][$($tblock:tt)*] } $($start:tt)*] end[$($end:tt)*] 
+	] => {{
 		let ($($args),*) : ( $($crate::create_looper_type![ $($aty)? ]),* ) = $tname: loop {
 			$crate::create_looper! {
-				[$break][$r $rb]@ start[$($start_tt)*] end[$($end_tt)*]
+				[$break][$r $($root_block)*]@ start[$($start)*] end[$($end)*]
 			}
 
 			break $break;
@@ -327,16 +354,18 @@ macro_rules! create_looper {
 	//
 	
 	// no args
-	[ [$break:lifetime][$r:lifetime $rb:block]@ start[{ [$tname:lifetime][][$($tblock:tt)*] } $($start_tt:tt)*] end[$($end_tt:tt)*] ] => {{
+	[ [$break:lifetime][$r:lifetime $($root_block:tt)*]
+		@ start[{ [$tname:lifetime][][$($tblock:tt)*] } $($start:tt)*] end[$($end:tt)*] 
+	] => {
 		$tname: loop {
 			$crate::create_looper! {
-				[$break][$r $rb]@ start[$($start_tt)*] end[$($end_tt)*]
+				[$break][$r $($root_block)*]@ start[$($start)*] end[$($end)*]
 			}
 
 			break $break;
 		}
 		$($tblock)*
-	}};
+	};
 	//
 }
 
